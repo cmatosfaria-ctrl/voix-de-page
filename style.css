@@ -118,3 +118,11 @@ input[type=range]{accent-color:var(--accent)}
 .edit-area{min-height:50vh}
 .install{display:none}
 @media (max-width:860px){.rail{display:none}.rail.open{display:flex;position:fixed;inset:0;z-index:30;padding-top:max(16px,env(safe-area-inset-top,0px))}}
+.cropbg{position:fixed;inset:0;z-index:50;background:#0b0e13;color:#eef2f7;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.crophead{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:12px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+.crophead span{color:#9aa6b6;font-size:.9rem}
+.cropstage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+.cropstage canvas{touch-action:none;display:block;max-width:100%;max-height:100%}
+.croptools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px))}
+.croptools .btn{background:#ffffff14;color:#eef2f7;border-color:#ffffff22}
+.croptools .btn.primary{background:#ffe27a;color:#1d2430;border-color:#ffe27a}

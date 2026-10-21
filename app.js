@@ -346,22 +346,6 @@ function getWorker(){
   workerP.catch(() => { workerP = null; });
   return workerP;
 }
-function prepare(file){
-  // Downscale huge photos, upscale tiny ones; Tesseract does its own binarisation.
-  return new Promise((res, rej) => {
-    const url = URL.createObjectURL(file); const img = new Image();
-    img.onload = () => {
-      const long = Math.max(img.width, img.height);
-      const k = long > 3000 ? 3000 / long : long < 1200 ? 1200 / long : 1;
-      const c = document.createElement("canvas"); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
-      const g = c.getContext("2d"); g.filter = "grayscale(1) contrast(1.15)"; g.drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      res({canvas:c, thumb:c.toDataURL("image/jpeg", 0.4)});
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("image")); };
-    img.src = url;
-  });
-}
 function cleanLines(lines){
   let out = "";
   lines.map(l => l.replace(/\s+/g, " ").trim()).filter(Boolean).forEach(l => {
@@ -409,19 +393,23 @@ async function handleFiles(files){
   $("pasteBox").hidden = true; $("text").textContent = ""; $("example").hidden = true;
   $("docTitle").textContent = "Lecture des photos…";
   const th = $("thumbs"); th.textContent = ""; th.hidden = false;
-  const blocks = [];
+  const blocks = []; let skipped = 0;
   for (let i = 0; i < files.length; i++){
     const label = `Page ${i+1} sur ${files.length}`;
     onProgress = m => {
       if (m.status === "recognizing text") status(`${label} : lecture du texte…`, false, m.progress);
       else if (/loading|initializ/.test(m.status)) status(`${label} : préparation (${ocrLangs.map(l=>LANGS[l]).join(", ")})…`, false, m.progress || 0);
     };
-    status(`${label} : préparation…`, false, 0);
     try {
-      const {canvas, thumb} = await prepare(files[i]);
-      const im = new Image(); im.src = thumb; im.alt = "Page " + (i+1); th.append(im);
+      const img = await Scan.loadImage(files[i]);
+      status(`${label} : ajustez les coins de la page.`);
+      const picked = await Scan.adjust(img, {index:i+1, total:files.length});
+      if (!picked){ skipped++; continue; }
+      const canvas = picked.canvas;
+      status(`${label} : préparation…`, false, 0);
+      const im = new Image(); im.src = canvas.toDataURL("image/jpeg", 0.3); im.alt = "Page " + (i+1); th.append(im);
       const w = await getWorker();
-      const {data} = await w.recognize(canvas, {rotateAuto:true}, {text:true, blocks:true});
+      const {data} = await w.recognize(canvas, {}, {text:true, blocks:true});
       const found = toBlocks(data);
       if (!found.length && data.text?.trim()) found.push({type:"text", lang:guessLang(data.text, ocrLangs), text:cleanLines(data.text.split("\n")), conf:Math.round(data.confidence)});
       blocks.push(...found);
@@ -431,6 +419,7 @@ async function handleFiles(files){
     }
   }
   onProgress = null;
+  if (skipped === files.length){ openDoc(cur || EXAMPLE); return; }
   if (!blocks.length){ status("Aucun texte trouvé. Prenez la photo bien à plat, avec une bonne lumière, et vérifiez les langues choisies.", true); $("docTitle").textContent = cur ? cur.title : "Voix de page"; return; }
   const first = blocks.find(b => b.type === "heading") || blocks[0];
   const title = first.text.split(/\s+/).slice(0, 6).join(" ") + (words(first.text) > 6 ? "…" : "");

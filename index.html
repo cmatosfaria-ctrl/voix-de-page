@@ -109,7 +109,18 @@
     <button class="btn primary" id="sheetClose">Terminé</button>
   </div>
 </div>
+<div class="cropbg" id="cropBg" hidden>
+  <div class="crophead"><strong id="cropTitle">Ajustez les coins de la page</strong><span id="cropHint"></span></div>
+  <div class="cropstage"><canvas id="cropView"></canvas></div>
+  <div class="croptools">
+    <button class="btn" id="cropCancel">Annuler</button>
+    <button class="btn" id="cropRotate">Pivoter ↻</button>
+    <button class="btn" id="cropAll">Toute la photo</button>
+    <button class="btn primary" id="cropOk">Lire cette page</button>
+  </div>
+</div>
 <script src="vendor/tesseract/tesseract.min.js"></script>
+<script src="scan.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

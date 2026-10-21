@@ -1,7 +1,7 @@
 // Everything the app needs lives on the same origin, so one cache-first list covers it.
-const VERSION = "vdp-1";
+const VERSION = "vdp-2";
 const FILES = [
-  "./", "index.html", "style.css", "app.js", "manifest.webmanifest",
+  "./", "index.html", "style.css", "app.js", "scan.js", "manifest.webmanifest",
   "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png",
   "vendor/tesseract/tesseract.min.js", "vendor/tesseract/worker.min.js",
   "vendor/core/tesseract-core-lstm.wasm.js", "vendor/core/tesseract-core-simd-lstm.wasm.js",
